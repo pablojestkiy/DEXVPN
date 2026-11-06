@@ -1,4 +1,4 @@
-name: DEXVPN Android Build
+name: DEXVPN Build
 
 on:
   workflow_dispatch:
@@ -9,18 +9,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Extract project
         run: unzip -o DEXVPN_mobile_upload.zip -d project
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v4
-        ug/*.apk
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: |
+          cd project/DEXVPN/android
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DEXVPN-APK
+          path: project/DEXVPN/android/app/build/outputs/apk/debug/*.apk
