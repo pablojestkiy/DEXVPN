@@ -1,4 +1,4 @@
-name: DEXVPN Build
+
 
 on:
   workflow_dispatch:
@@ -34,8 +34,3 @@ jobs:
           cd project/DEXVPN/android
           gradle assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: DEXVPN-APK
-          path: project/DEXVPN/android/app/build/outputs/apk/debug/*.apk
