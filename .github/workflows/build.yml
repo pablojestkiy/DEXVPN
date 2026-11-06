@@ -1,1 +1,48 @@
+name: DEXVPN Build
 
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'DEXVPN_mobile_upload.zip'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project
+        run: unzip -o DEXVPN_mobile_upload.zip -d project
+
+      - name: Repair Gradle properties
+        run: |
+          cat > project/DEXVPN/android/gradle.properties <<'PROPS'
+          org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          kotlin.code.style=official
+          PROPS
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        working-directory: project/DEXVPN/android
+        run: gradle assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DEXVPN-APK
+          path: project/DEXVPN/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
